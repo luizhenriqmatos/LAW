@@ -100,3 +100,18 @@ Nenhuma pendência trava a construção: cada uma tem solução provisória isol
 | P-002 | Chave pública vigente do DataJud | Chave pública do CNJ aceita em 09/11/2026 (consulta real ao TRF1 pelo adaptador trouxe classe, órgão, assuntos e 43 movimentos). Fica em `DATAJUD_API_KEY`; se o CNJ trocar, a captura registra "chave_recusada" | 2026-11-09 |
 | P-005 | Confirmar códigos das séries no SGS | Conferidos em 09/11/2026: IPCA 433, IPCA-E 10764, INPC 188 e IGP-M 28655 estão na lista de índices da Calculadora do Cidadão (que usa a 28655, com mais casas, e não a antiga 189); Selic acumulada no mês 4390 no catálogo de dados abertos do BCB; Taxa Legal 29543 em várias fontes (começa em 08/2024, vale desde 30/08/2024); IPCA-15 7478 e TR mensal 7811 conferidos pelos valores publicados. Todos num só lugar: `SERIES_SGS` em `src/lib/integrations/bcb/sgs.ts` e a tabela `indice_serie` | 2026-11-09 |
 | P-008 | Nome próprio do assistente de IA | **Lia** (L de LAW + IA), definido no Prompt 11 em `src/lib/assistente/nome.ts`. A busca de marca no INPI virou a P-066 | 2026-11-10 |
+
+## Preview Vercel (prompt 14)
+- P-090: adicionar na Vercel (painel, Settings > Environment Variables) `SUPABASE_SERVICE_ROLE_KEY` e `CRON_SECRET`. Só você; nunca por mim. Sem elas: cron, purga, portal e WhatsApp não funcionam.
+- P-091: Supabase > Authentication > URL Configuration: Site URL `https://law-pi-sand.vercel.app` e Redirect URLs `https://law-pi-sand.vercel.app/**`. Sem isso o link por e-mail falha.
+- P-092: seed de índices (`20261110000100_indices_carga_inicial.sql`, 139 KB) não aplicado. Cálculos sem índice até o job preencher.
+- P-093: testar login/Conta com conta criada por você (não crio conta por regra de segurança).
+- Preview testado: `/`, `/termos`, `/privacidade`, `/entrar` ok; `/app/conta` redireciona ao login ok; console sem erro.
+
+## Login (10/11/2026)
+- P-091 (reforço): é a causa principal do login quebrado. Enquanto Site URL for localhost, o link do e-mail cai em página morta.
+- P-094: gatilho `law_autoconfirmar` em `auth.users` confirma e-mail sozinho (enfraquece a verificação). Remover logo depois da P-091: `drop trigger law_autoconfirmar on auth.users; drop function law_autoconfirmar_email();`
+- P-095: link do e-mail usa código PKCE (só funciona no mesmo navegador em que a pessoa pediu). No iPhone, o Gmail abre em outro navegador e o login direto falha; o app agora avisa e manda entrar com senha. Solução definitiva: trocar os modelos de e-mail do Supabase (Authentication > Emails) para `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=email`. A rota já aceita.
+- P-096: e-mail embutido do Supabase manda poucos e-mails por hora e só serve para teste. Configurar SMTP próprio (Resend, P-016) em Authentication > Emails > SMTP Settings.
+- P-097: cadastro com e-mail que já tem conta não avisa "já existe" (de propósito, para não revelar quem tem conta). Mensagem neutra. Decidir se quer aviso explícito.
+- P-098: logs de auth do Supabase não saíram pelo conector (erro "Failed to get project's logs"). Diagnóstico feito pelas tabelas `auth.*`.

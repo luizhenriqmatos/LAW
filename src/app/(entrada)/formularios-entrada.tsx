@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { BotaoEnviar, Campo, Mensagem } from "@/components/formulario";
 import { cadastrar, entrarComSenha, enviarLinkDeAcesso } from "./actions";
@@ -9,6 +9,10 @@ export function FormularioEntrar({ proximo }: { proximo: string }) {
   const [modo, setModo] = useState<"senha" | "link">("senha");
   const [estadoSenha, acaoSenha] = useActionState(entrarComSenha, undefined);
   const [estadoLink, acaoLink] = useActionState(enviarLinkDeAcesso, undefined);
+  // O Supabase às vezes devolve o erro do link depois do "#" na URL (o servidor não enxerga essa parte).
+  useEffect(() => {
+    if (/error(_code)?=/.test(window.location.hash)) window.location.replace("/entrar?erro=expirado");
+  }, []);
   return (
     <div className="grid gap-5">
       <div className="inline-flex w-fit rounded-full bg-white p-1 text-sm font-medium">

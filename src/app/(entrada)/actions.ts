@@ -8,10 +8,16 @@ import { caminhoSeguro, mensagemDeErro } from "@/lib/erros";
 import { esquemaLogin } from "@/lib/validacao";
 import type { EstadoFormulario } from "@/components/formulario";
 
+const LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/;
+
+/** Endereço do site para os links do e-mail. Vem de NEXT_PUBLIC_SITE_URL; em produção nunca devolve localhost. */
 async function origem() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
   const h = await headers();
-  return `${h.get("x-forwarded-proto") ?? "http"}://${h.get("host")}`;
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+  const hostLocal = LOCAL.test(host);
+  const configurada = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  if (configurada && (hostLocal || !/\/\/(localhost|127\.0\.0\.1|\[::1\])/.test(configurada))) return configurada;
+  return `${hostLocal ? (h.get("x-forwarded-proto") ?? "http") : "https"}://${host}`;
 }
 
 export async function entrarComSenha(_: EstadoFormulario, dados: FormData): Promise<EstadoFormulario> {
@@ -33,7 +39,7 @@ export async function enviarLinkDeAcesso(_: EstadoFormulario, dados: FormData): 
     options: { emailRedirectTo: `${await origem()}/auth/confirmar?proximo=${encodeURIComponent(proximo)}`, shouldCreateUser: true },
   });
   if (error) return { erro: mensagemDeErro(error) };
-  return { ok: "Enviamos um link de acesso para o seu e-mail. Abra no mesmo aparelho." };
+  return { ok: `Enviamos um link de acesso para ${email.data}. Abra o link neste mesmo aparelho e navegador. Se não chegar em 2 minutos, olhe o spam.` };
 }
 
 export async function cadastrar(_: EstadoFormulario, dados: FormData): Promise<EstadoFormulario> {
@@ -48,7 +54,10 @@ export async function cadastrar(_: EstadoFormulario, dados: FormData): Promise<E
   });
   if (error) return { erro: mensagemDeErro(error) };
   if (data.session) redirect(proximo);
-  return { ok: "Conta criada. Confirme pelo link que enviamos para o seu e-mail." };
+  // PENDENCIA P-097: mensagem neutra de propósito (não revela se o e-mail já tinha conta).
+  return {
+    ok: `Falta um passo: confirme seu e-mail. Enviamos um link para ${r.data.email}. Abra o link neste mesmo aparelho e depois entre com sua senha. Se não chegar em 2 minutos, olhe o spam. Se você já tinha conta com este e-mail, é só entrar.`,
+  };
 }
 
 export async function sair() {

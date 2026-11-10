@@ -81,6 +81,13 @@ const MENSAGENS: Record<string, string> = {
   "Invalid login credentials": "E-mail ou senha incorretos.",
   "Email not confirmed": "Confirme seu e-mail pelo link que enviamos antes de entrar.",
   "User already registered": "Este e-mail já tem conta. Entre ou use o link de acesso.",
+  "Email link is invalid or has expired": "Este link venceu ou já foi usado. Peça um novo.",
+  "Password should be": "Senha fraca. Use pelo menos 8 caracteres.",
+  "Signups not allowed": "O cadastro de novas contas está fechado no momento.",
+  "address not authorized": "Não conseguimos enviar e-mail para este endereço agora. Tente outro e-mail ou avise o suporte.",
+  "Email address": "Este e-mail não foi aceito. Confira se digitou certo.",
+  "Error sending": "Não conseguimos enviar o e-mail agora. Tente de novo em alguns minutos.",
+  "For security purposes": "Aguarde um minuto antes de pedir outro e-mail.",
   // Cálculos (Prompt 8)
   processo_invalido: "Escolha um processo confirmado deste escritório.",
   regime_invalido: "Regime inválido ou de outro escritório. Confira os campos do regime.",
@@ -139,13 +146,21 @@ const MENSAGENS: Record<string, string> = {
   calculo_sem_processo: "Ligue o cálculo a um processo para salvar o PDF na pasta dele.",
 };
 
+/** Mensagens da tela de entrada quando o link do e-mail falha (código vai na URL: /entrar?erro=...). */
+export const ERROS_DE_LINK: Record<string, string> = {
+  expirado: "Este link venceu ou já foi usado. Entre com sua senha ou peça um novo link.",
+  navegador:
+    "Não deu para entrar direto por este link: ele precisa ser aberto no mesmo navegador em que você pediu. Se era a confirmação do cadastro, seu e-mail já foi confirmado: entre com e-mail e senha.",
+  link: "O link não é mais válido. Entre com sua senha ou peça um novo link.",
+};
+
 export function mensagemDeErro(erro: unknown): string {
   const texto = erro instanceof Error ? erro.message : typeof erro === "object" && erro && "message" in erro ? String((erro as { message: unknown }).message) : String(erro ?? "");
   for (const [chave, msg] of Object.entries(MENSAGENS)) {
     if (texto.includes(chave)) return msg;
   }
   if (/check constraint/.test(texto)) return "Algum dado não passou na validação. Confira os campos.";
-  if (/rate limit/i.test(texto)) return "Muitas tentativas em pouco tempo. Aguarde um minuto.";
+  if (/rate limit/i.test(texto)) return "Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente de novo.";
   return "Algo deu errado. Tente de novo em instantes.";
 }
 
