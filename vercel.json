@@ -1,0 +1,44 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": [
+    "gru1"
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/captura",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/prazos",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/agenda-sync",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/cron/drive-sync",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/financeiro",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/indices",
+      "schedule": "0 13 2,12,26 * *"
+    },
+    {
+      "path": "/api/cron/portal",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/assinaturas",
+      "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/cron/encerramento",
+      "schedule": "0 16 * * *"
+    }
+  ]
+}
