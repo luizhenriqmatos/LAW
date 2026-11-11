@@ -54,9 +54,13 @@ export async function cadastrar(_: EstadoFormulario, dados: FormData): Promise<E
   });
   if (error) return { erro: mensagemDeErro(error) };
   if (data.session) redirect(proximo);
-  // PENDENCIA P-097: mensagem neutra de propósito (não revela se o e-mail já tinha conta).
+  // Com confirmação de e-mail ligada, o Supabase devolve um usuário "de mentira" sem identidades quando o e-mail já tem conta.
+  // Decisão do dono (P-097): avisar de forma explícita, mesmo que isso revele que o e-mail tem conta.
+  if (data.user && (data.user.identities?.length ?? 0) === 0) {
+    return { erro: "Este e-mail já tem conta. Entre com sua senha ou use o link no e-mail na tela de entrada." };
+  }
   return {
-    ok: `Falta um passo: confirme seu e-mail. Enviamos um link para ${r.data.email}. Abra o link neste mesmo aparelho e depois entre com sua senha. Se não chegar em 2 minutos, olhe o spam. Se você já tinha conta com este e-mail, é só entrar.`,
+    ok: `Falta um passo: confirme seu e-mail. Enviamos um link para ${r.data.email}. Abra o link neste mesmo aparelho e depois entre com sua senha. Se não chegar em 2 minutos, olhe o spam.`,
   };
 }
 

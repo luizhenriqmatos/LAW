@@ -110,8 +110,8 @@ Nenhuma pendência trava a construção: cada uma tem solução provisória isol
 
 ## Login (10/11/2026)
 - P-091 (reforço): é a causa principal do login quebrado. Enquanto Site URL for localhost, o link do e-mail cai em página morta.
-- P-094: gatilho `law_autoconfirmar` em `auth.users` confirma e-mail sozinho (enfraquece a verificação). Remover logo depois da P-091: `drop trigger law_autoconfirmar on auth.users; drop function law_autoconfirmar_email();`
+- P-094 (RESOLVIDA 11/11, migration 20261111100000): gatilho `law_autoconfirmar` em `auth.users` confirma e-mail sozinho (enfraquece a verificação). Remover logo depois da P-091: `drop trigger law_autoconfirmar on auth.users; drop function law_autoconfirmar_email();`
 - P-095: link do e-mail usa código PKCE (só funciona no mesmo navegador em que a pessoa pediu). No iPhone, o Gmail abre em outro navegador e o login direto falha; o app agora avisa e manda entrar com senha. Solução definitiva: trocar os modelos de e-mail do Supabase (Authentication > Emails) para `{{ .SiteURL }}/auth/confirmar?token_hash={{ .TokenHash }}&type=email`. A rota já aceita.
 - P-096: e-mail embutido do Supabase manda poucos e-mails por hora e só serve para teste. Configurar SMTP próprio (Resend, P-016) em Authentication > Emails > SMTP Settings.
-- P-097: cadastro com e-mail que já tem conta não avisa "já existe" (de propósito, para não revelar quem tem conta). Mensagem neutra. Decidir se quer aviso explícito.
-- P-098: logs de auth do Supabase não saíram pelo conector (erro "Failed to get project's logs"). Diagnóstico feito pelas tabelas `auth.*`.
+- P-097 (RESOLVIDA 11/11): dono quis aviso explícito. Feito. Antes: cadastro com e-mail que já tem conta não avisa "já existe" (de propósito, para não revelar quem tem conta). Mensagem neutra. Decidir se quer aviso explícito.
+- P-098 (RESOLVIDA 11/11): logs voltaram a funcionar sozinhos (falha passageira do conector). Antes: logs de auth do Supabase não saíram pelo conector (erro "Failed to get project's logs"). Diagnóstico feito pelas tabelas `auth.*`.
